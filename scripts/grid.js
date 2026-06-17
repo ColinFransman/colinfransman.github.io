@@ -11,8 +11,13 @@ export function buildMineGrid(rows, cols, mine_chance, neighborCounter, neighbor
         }
 
         const safeTiles = [];
+        const dynamicNeighborDeltas = typeof neighborDeltas === 'function';
+
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
+                if (dynamicNeighborDeltas) {
+                    grid[row][col].neighborDeltas = neighborDeltas(grid, row, col);
+                }
                 if (!grid[row][col].isMine) {
                     safeTiles.push({ row, col });
                 }
@@ -57,11 +62,14 @@ export function buildMineGrid(rows, cols, mine_chance, neighborCounter, neighbor
                 while (stack.length) {
                     const [r, c] = stack.pop();
                     comp.push({ row: r, col: c });
-                    for (const [dr, dc] of (neighborDeltas || [
-                        [-1, -1], [-1, 0], [-1, 1],
-                        [0, -1], [0, 1],
-                        [1, -1], [1, 0], [1, 1]
-                    ])) {
+                    const componentDeltas = dynamicNeighborDeltas
+                        ? grid[r][c].neighborDeltas || []
+                        : neighborDeltas || [
+                            [-1, -1], [-1, 0], [-1, 1],
+                            [0, -1], [0, 1],
+                            [1, -1], [1, 0], [1, 1]
+                        ];
+                    for (const [dr, dc] of componentDeltas) {
                         const nr = r + dr;
                         const nc = c + dc;
                         const nkey = `${nr},${nc}`;

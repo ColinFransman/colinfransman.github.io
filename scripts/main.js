@@ -2,6 +2,9 @@ import { buildMineGrid } from './grid.js';
 import { neighborCounter as classicNeighbor, neighborDeltas as classicDeltas } from './gamemodes/classic.js';
 import { neighborCounter as plusNeighbor, neighborDeltas as plusDeltas } from './gamemodes/plus.js';
 import { neighborCounter as crossNeighbor, neighborDeltas as crossDeltas } from './gamemodes/cross.js';
+import { neighborCounter as knightNeighbor, neighborDeltas as knightDeltas } from './gamemodes/knight.js';
+import { neighborCounter as largeNeighbor, neighborDeltas as largeDeltas } from './gamemodes/large.js';
+import { neighborCounter as chaosNeighbor, neighborDeltas as chaosDeltas } from './gamemodes/chaos.js';
 
 let GRID_ROWS = 10;
 let GRID_COLS = 10;
@@ -9,11 +12,22 @@ let mineGrid = [];
 let customWidth = 10;
 let customHeight = 10;
 let customDensity = 0.16;
+let currentDifficulty = 'basic';
 let currentGamemode = 'classic';
+
+const difficultyProfiles = {
+    basic: { width: 10, height: 10, density: 0.16 },
+    advanced: { width: 20, height: 14, density: 0.24 },
+    expert: { width: 30, height: 20, density: 0.32 }
+};
+
 const gamemodeMap = {
     classic: { neighborCounter: classicNeighbor, neighborDeltas: classicDeltas },
     plus: { neighborCounter: plusNeighbor, neighborDeltas: plusDeltas },
-    cross: { neighborCounter: crossNeighbor, neighborDeltas: crossDeltas }
+    cross: { neighborCounter: crossNeighbor, neighborDeltas: crossDeltas },
+    knight: { neighborCounter: knightNeighbor, neighborDeltas: knightDeltas },
+    large: { neighborCounter: largeNeighbor, neighborDeltas: largeDeltas },
+    chaos: { neighborCounter: chaosNeighbor, neighborDeltas: chaosDeltas }
 };
 // custom gamemode uses classic adjacency but unlocks size/density options
 gamemodeMap.custom = { neighborCounter: classicNeighbor, neighborDeltas: classicDeltas };
@@ -35,6 +49,9 @@ function loadOptions() {
         if (typeof opts.isEasyReveal === 'boolean') isEasyReveal = opts.isEasyReveal;
         if (typeof opts.isEasyFlag === 'boolean') isEasyFlag = opts.isEasyFlag;
         if (typeof opts.isAreaHelper === 'boolean') isAreaHelper = opts.isAreaHelper;
+        if (typeof opts.difficulty === 'string' && difficultyProfiles[opts.difficulty]) {
+            currentDifficulty = opts.difficulty;
+        }
         if (typeof opts.gamemode === 'string') {
             currentGamemode = opts.gamemode;
             neighborCounter = (gamemodeMap[currentGamemode] && gamemodeMap[currentGamemode].neighborCounter) || classicNeighbor;
@@ -50,7 +67,7 @@ function loadOptions() {
 
 function saveOptions() {
     try {
-        const opts = { isEasyReveal: !!isEasyReveal, isEasyFlag: !!isEasyFlag, isAreaHelper: !!isAreaHelper, gamemode: currentGamemode, customWidth: Number(customWidth), customHeight: Number(customHeight), customDensity: Number(customDensity) };
+        const opts = { isEasyReveal: !!isEasyReveal, isEasyFlag: !!isEasyFlag, isAreaHelper: !!isAreaHelper, gamemode: currentGamemode, difficulty: currentDifficulty, customWidth: Number(customWidth), customHeight: Number(customHeight), customDensity: Number(customDensity) };
         localStorage.setItem('minesweeper_options', JSON.stringify(opts));
     } catch (e) {
         console.warn('Failed to save options', e);
@@ -62,18 +79,24 @@ function init(mine_chance = 0.16) {
         mine_chance = 0.16;
     }
 
-    mine_chance = Number(mine_chance);
-    if (!Number.isFinite(mine_chance) || mine_chance < 0) {
-        mine_chance = 0.16;
-    }
-    mine_chance = Math.min(Math.max(mine_chance, 0), 1);
-
     // if custom mode is active, use custom size/density
     if (currentGamemode === 'custom') {
         GRID_ROWS = Number(customHeight) || GRID_ROWS;
         GRID_COLS = Number(customWidth) || GRID_COLS;
         mine_chance = Number(customDensity) || mine_chance;
+    } else {
+        // use difficulty profile settings for other gamemodes
+        const profile = difficultyProfiles[currentDifficulty] || difficultyProfiles.basic;
+        GRID_ROWS = profile.height;
+        GRID_COLS = profile.width;
+        mine_chance = profile.density;
     }
+
+    mine_chance = Number(mine_chance);
+    if (!Number.isFinite(mine_chance) || mine_chance < 0) {
+        mine_chance = 0.16;
+    }
+    mine_chance = Math.min(Math.max(mine_chance, 0), 1);
 
     // build using the active gamemode's neighbor counter and deltas
     mineGrid = buildMineGrid(GRID_ROWS, GRID_COLS, mine_chance, neighborCounter, neighborDeltas);
@@ -87,6 +110,17 @@ function init(mine_chance = 0.16) {
 
 function getCellElement(row, col) {
     return document.querySelector(`#minegrid [data-row="${row}"][data-col="${col}"]`);
+}
+
+function getNeighborDeltasFor(row, col) {
+    const tile = mineGrid[row] && mineGrid[row][col];
+    if (tile && Array.isArray(tile.neighborDeltas)) {
+        return tile.neighborDeltas;
+    }
+    if (typeof neighborDeltas === 'function') {
+        return neighborDeltas(mineGrid, row, col);
+    }
+    return neighborDeltas || [];
 }
 
 function revealTile(cellElement, row, col, allowMines = false) {
@@ -173,7 +207,7 @@ function hideOverlay() {
 
 function countFlaggedNeighbors(row, col) {
     let count = 0;
-    for (const [dr, dc] of neighborDeltas) {
+    for (const [dr, dc] of getNeighborDeltasFor(row, col)) {
         const nr = row + dr;
         const nc = col + dc;
         if (nr < 0 || nr >= GRID_ROWS || nc < 0 || nc >= GRID_COLS) continue;
@@ -184,7 +218,7 @@ function countFlaggedNeighbors(row, col) {
 }
 function countHiddenNeighbors(row, col) {
     const hiddenNeighbors = [];
-    for (const [dr, dc] of neighborDeltas) {
+    for (const [dr, dc] of getNeighborDeltasFor(row, col)) {
         const nr = row + dr;
         const nc = col + dc;
         if (nr < 0 || nr >= GRID_ROWS || nc < 0 || nc >= GRID_COLS) continue;
@@ -211,7 +245,7 @@ function easyFlagNeighbors(row, col) {
 }
 function getNeighborElements(row, col) {
     const els = [];
-    for (const [dr, dc] of neighborDeltas) {
+    for (const [dr, dc] of getNeighborDeltasFor(row, col)) {
         const nr = row + dr;
         const nc = col + dc;
         if (nr < 0 || nr >= GRID_ROWS || nc < 0 || nc >= GRID_COLS) continue;
@@ -240,7 +274,7 @@ function revealNeighborRing(startRow, startCol, allowMines = false) {
 
     while (queue.length) {
         const { row, col } = queue.shift();
-        for (const [dr, dc] of neighborDeltas) {
+        for (const [dr, dc] of getNeighborDeltasFor(row, col)) {
             const nr = row + dr;
             const nc = col + dc;
             const key = `${nr},${nc}`;
@@ -404,8 +438,22 @@ window.addEventListener("DOMContentLoaded", () => {
     }
         const gmSelectLeft = document.getElementById('opt-gamemode');
         const gmSelectRight = document.getElementById('opt-gamemode-right');
+        const difficultySelect = document.getElementById('opt-difficulty');
+        
         if (gmSelectLeft) gmSelectLeft.value = currentGamemode;
         if (gmSelectRight) gmSelectRight.value = currentGamemode;
+        if (difficultySelect) difficultySelect.value = currentDifficulty;
+
+        function onDifficultyChange(value) {
+            if (!difficultyProfiles[value]) return;
+            currentDifficulty = value;
+            saveOptions();
+            resetGame();
+        }
+
+        if (difficultySelect) {
+            difficultySelect.addEventListener('change', (e) => onDifficultyChange(e.target.value));
+        }
 
         function onGamemodeChange(value, source) {
             currentGamemode = value;
@@ -414,6 +462,16 @@ window.addEventListener("DOMContentLoaded", () => {
             if (gmSelectLeft && source !== 'left') gmSelectLeft.value = value;
             if (gmSelectRight && source !== 'right') gmSelectRight.value = value;
             saveOptions();
+            // reset custom parameters to defaults when leaving custom mode
+            if (value !== 'custom') {
+                customWidth = 10;
+                customHeight = 10;
+                customDensity = 0.16;
+                if (widthInput) widthInput.value = customWidth;
+                if (heightInput) heightInput.value = customHeight;
+                if (densityRange) densityRange.value = customDensity;
+                if (densityNum) densityNum.value = customDensity;
+            }
             // show/hide custom controls
             if (customControls) {
                 const show = currentGamemode === 'custom';
@@ -503,6 +561,21 @@ window.addEventListener("DOMContentLoaded", () => {
     // ensure custom controls visibility reflects current gamemode
     if (customControls) {
         customControls.style.display = currentGamemode === 'custom' ? '' : 'none';
+    }
+
+    const toggleMenusButton = document.getElementById('toggle-menus-button');
+    const toggleMenusLabel = document.querySelector('.toggle-menus-label');
+    function updateToggleMenusButtonText() {
+        if (!toggleMenusLabel) return;
+        toggleMenusLabel.textContent = document.body.classList.contains('menus-hidden') ? 'Show Menus' : 'Hide Menus';
+    }
+
+    if (toggleMenusButton) {
+        toggleMenusButton.addEventListener('click', () => {
+            document.body.classList.toggle('menus-hidden');
+            updateToggleMenusButtonText();
+        });
+        updateToggleMenusButtonText();
     }
 
     init();

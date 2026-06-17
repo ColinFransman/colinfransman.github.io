@@ -8,6 +8,7 @@
     <title>Mine Sweeper</title>
 </head>
 <body>
+    <button id="toggle-menus-button" type="button" class="toggle-menus-button"><span class="toggle-menus-label">Hide Menus</span></button>
     <div class="center-row">
         <aside class="options-panel" aria-label="Options">
             <h3>Options</h3>
@@ -53,11 +54,25 @@
             <h3>Game Mode</h3>
             <div class="option-column">
                 <div class="option-row">
+                    <label for="opt-difficulty">Difficulty</label>
+                    <select id="opt-difficulty" class="opt-select">
+                        <option value="basic">Basic</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                <p class="option-description">Choose a difficulty level.</p>
+            </div>
+            <div class="option-column">
+                <div class="option-row">
                     <label for="opt-gamemode-right">Mode</label>
                     <select id="opt-gamemode-right" class="opt-select">
                         <option value="classic">Classic</option>
                         <option value="plus">Plus</option>
                         <option value="cross">Cross</option>
+                        <option value="knight">Knight</option>
+                        <option value="large">Large</option>
+                        <option value="chaos">Chaos</option>
                         <option value="custom">Custom</option>
                     </select>
                 </div>

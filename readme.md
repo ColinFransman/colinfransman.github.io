@@ -1,0 +1,2 @@
+## Description
+Hi, my name is Colin Fransman and this is my silly variant of minesweeper. I am a big fan of minesweeper and wanted to create one myself. However, I didn't want to make another basic minesweeper as there are already enough of those, so I decided to add some of my own gamemodes. I will probably add some more in the future, so check back from time to time and see if some new features have been added.
