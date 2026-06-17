@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="scripts/main.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Mine Sweeper</title>
+</head>
+<body>
+    <div class="center-row">
+        <aside class="options-panel" aria-label="Options">
+            <h3>Options</h3>
+            <div class="option-column">
+                <div class="option-row switch-row">
+                    <span>Easy Reveal</span>
+                    <label class="switch">
+                        <input id="opt-easy-reveal" type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="option-description">Allows left clicking on complete cells to reveal adjacent cells.</p>
+            </div>  
+            <div class="option-column">
+                <div class="option-row switch-row">
+                    <span>Easy Flag</span>
+                    <label class="switch">
+                        <input id="opt-easy-flag" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="option-description">Allows right clicking to flag remaining cells.</p>
+            </div>
+            <div class="option-column">
+                <div class="option-row switch-row">
+                    <span>Area Helper</span>
+                    <label class="switch">
+                        <input id="opt-area-helper" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="option-description">Helper for visualizing tile areas. Useful for learning new gamemodes</p>
+            </div>
+            <div class="option-row">
+                <button id="reset-button" type="button">New Game</button>
+            </div>
+        </aside>
+
+        <div class="game-shell">
+            <grid id="minegrid" class="bg-grid"></grid>
+        </div>
+        <aside class="gamemode-panel" aria-label="Game Mode">
+            <h3>Game Mode</h3>
+            <div class="option-column">
+                <div class="option-row">
+                    <label for="opt-gamemode-right">Mode</label>
+                    <select id="opt-gamemode-right" class="opt-select">
+                        <option value="classic">Classic</option>
+                        <option value="plus">Plus</option>
+                        <option value="cross">Cross</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <p class="option-description">Quick selector for game modes.</p>
+            </div>
+            <div id="custom-controls" class="option-column" style="display:none;">
+                <div class="option-row">
+                    <label for="opt-custom-width">Width</label>
+                    <input id="opt-custom-width" class="opt-input" type="number" min="5" max="60" step="1" value="10">
+                </div>
+                <div class="option-row">
+                    <label for="opt-custom-height">Height</label>
+                    <input id="opt-custom-height" class="opt-input" type="number" min="5" max="60" step="1" value="10">
+                </div>
+                <p class="option-description">Set the grid width and height for the custom gamemode.</p>
+                <div class="option-row">
+                    <label for="opt-custom-density">Mine Density</label>
+                    <div class="density-controls">
+                        <input id="opt-custom-density" type="range" min="0" max="0.5" step="0.01" value="0.16">
+                        <input id="opt-custom-density-num" class="opt-input" type="number" min="0" max="0.99" step="0.01" value="0.16" style="width:6rem;margin-left:.5rem;">
+                    </div>
+                </div>
+                <p class="option-description">Adjust mine density for the custom gamemode (percentage of tiles).</p>
+            </div>
+        </aside>
+    </div>
+
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true">
+        <div class="overlay-panel">
+            <h2>You Win!</h2>
+            <button id="overlay-restart" type="button">Play Again</button>
+        </div>
+    </div>
+</body>
+</html>
