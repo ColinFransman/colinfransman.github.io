@@ -29,21 +29,7 @@ body {
     position: relative;
 }
 
-.options-panel {
-    width: 200px;
-    background: linear-gradient(180deg, #0b1220, #0f172a);
-    color: #e6eef8;
-    padding: 18px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 8px 24px rgba(2,6,23,0.6);
-    position: fixed;
-    left: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-}
-
+.options-panel,
 .gamemode-panel {
     width: 200px;
     background: linear-gradient(180deg, #0b1220, #0f172a);
@@ -52,11 +38,21 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.06);
     box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+    z-index: 10;
+}
+
+.options-panel {
+    position: fixed;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.gamemode-panel {
     position: fixed;
     right: 24px;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 10;
 }
 
 .options-panel h3 {
@@ -75,7 +71,7 @@ body {
     margin-top: 4px;
 }
 
-.opt-input {
+.opt-input, .opt-select {
     background: #f8fafc;
     border: 2px solid #cbd5e1;
     border-radius: 999px;
@@ -88,19 +84,7 @@ body {
     transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
-.opt-select {
-    background: #f8fafc;
-    border: 2px solid #cbd5e1;
-    border-radius: 999px;
-    color: #1f2937;
-    font-size: 0.95rem;
-    font-weight: 700;
-    padding: 2px 10px;
-    margin-bottom: 4px;
-    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15);
-    cursor: pointer;
-    transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
-}
+.opt-select { cursor: pointer; }
 
 .opt-select:hover {
     background: #e2e8f0;
@@ -171,61 +155,28 @@ body {
     transform: translateX(20px);
 }
 
-#reset-button {
-    background: #f8fafc;
-    border: 2px solid #cbd5e1;
-    border-radius: 999px;
-    color: #1f2937;
-    font-size: 0.95rem;
-    font-weight: 700;
-    padding: 10px 20px;
-    cursor: pointer;
-    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15);
-    transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
-}
-
-#reset-button:hover {
-    background: #e2e8f0;
-    transform: translateY(-1px);
-}
-
-#reset-button:active {
-    transform: translateY(1px);
-}
-
+.reset-and-toggle,
+#reset-button,
 .toggle-menus-button {
-    display: block;
-    margin: 18px auto 12px;
     background: #f8fafc;
     border: 2px solid #cbd5e1;
     border-radius: 999px;
     color: #1f2937;
     font-size: 0.95rem;
     font-weight: 700;
-    padding: 10px 18px;
     cursor: pointer;
     box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15);
     transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
-.toggle-menus-button i {
-    display: inline-block;
-    font-size: 1rem;
-    line-height: 1;
-    color: inherit;
-}
+#reset-button { padding: 10px 20px; }
+#reset-button:hover { background: #e2e8f0; transform: translateY(-1px); }
+#reset-button:active { transform: translateY(1px); }
 
-.toggle-menus-button:hover {
-    background: #e2e8f0;
-    transform: translateY(-1px);
-}
-
-.toggle-menus-button:active {
-    transform: translateY(1px);
-}
+.toggle-menus-button { display: block; margin: 18px auto 12px; padding: 10px 18px; display: inline-flex; align-items: center; gap: 0.5rem; }
+.toggle-menus-button i { display: inline-block; font-size: 1rem; line-height: 1; color: inherit; }
+.toggle-menus-button:hover { background: #e2e8f0; transform: translateY(-1px); }
+.toggle-menus-button:active { transform: translateY(1px); }
 
 .menus-hidden .options-panel,
 .menus-hidden .gamemode-panel {
@@ -239,6 +190,7 @@ body {
     border: 4px solid #1f2937;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
     user-select: none;
+    display: grid;
 }
 
 /* Overlay for win screen */
@@ -441,4 +393,139 @@ body {
 
 .cell.number-8 {
     color: #334155;
+}
+
+/* Responsive adjustments for smaller screens (mobile/tablet) */
+@media (max-width: 900px) {
+    .center-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px;
+        max-width: 100%;
+    }
+
+    .options-panel,
+    .gamemode-panel {
+        position: static;
+        width: calc(100% - 48px);
+        max-width: 520px;
+        margin: 0 auto;
+        transform: none;
+        left: auto;
+        right: auto;
+        top: auto;
+        z-index: 5;
+    }
+
+    .game-shell {
+        order: 2;
+        padding: 0 8px;
+    }
+
+    .options-panel { order: 1; }
+    .gamemode-panel { order: 3; }
+}
+
+@media (max-width: 480px) {
+    .center-row { padding: 8px; gap: 10px; }
+
+    /* Make tiles smaller to fit narrow screens */
+    .cell { width: 30px; height: 30px; border-radius: 5px; }
+
+    /* Reduce grid padding and border so grid stays visible */
+    #minegrid.bg-grid { padding: 8px; border-radius: 10px; border-width: 2px; }
+
+    /* Slightly smaller option controls for mobile */
+    .options-panel, .gamemode-panel { padding: 12px; }
+    .option-description { font-size: 0.8rem; }
+    .opt-input, .opt-select { font-size: 0.9rem; padding: 2px 8px; }
+
+    /* Keep toggle button accessible */
+    .toggle-menus-button { margin: 12px auto; padding: 8px 14px; }
+}
+
+/* Add breathing room on the right side so tiles don't touch the viewport edge */
+@media (max-width: 900px) {
+    .center-row { padding-inline: 12px; }
+    #minegrid.bg-grid { padding-left: 4px; padding-right: 4px; }
+}
+
+@media (max-width: 480px) {
+    .center-row { padding-inline: 8px; }
+    #minegrid.bg-grid { padding-left: 4px; padding-right: 4px; }
+}
+
+/* Fix flex overflow issues so grid can scroll fully on small screens */
+html, body {
+    width: 100%;
+}
+
+.center-row {
+    min-width: 0; /* allow children to shrink inside flex container */
+    overflow-x: auto; /* enable horizontal scrolling if needed */
+    -webkit-overflow-scrolling: touch;
+}
+
+.game-shell {
+    min-width: 0;
+}
+
+#minegrid.bg-grid {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: auto; /* allow the grid itself to scroll horizontally */
+    padding-left: 4px; /* outer gutter so scrolled content keeps breathing room */
+    padding-right: 4px;
+    padding-bottom: 20px; /* room for a custom scrollbar so it doesn't overlap content */
+}
+
+/* Add inner padding to rows so cells don't sit flush against the grid border */
+#minegrid.bg-grid .row {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* Invisible spacer at the end of the grid to guarantee right-side breathing room when scrolled */
+#minegrid.bg-grid::after {
+    content: "";
+    display: block;
+    width: 56px; /* cell (40px) + gap/border buffer */
+    height: 1px; /* tiny height to avoid affecting layout vertically */
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    #minegrid.bg-grid::after { width: 46px; /* smaller cell + buffer */ }
+}
+
+/* Custom scrollbar styles for the minegrid (horizontal) — match dark panels */
+#minegrid.bg-grid {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.12) rgba(11,18,32,0.8);
+}
+
+/* WebKit browsers (Chrome, Edge, Safari) */
+#minegrid.bg-grid::-webkit-scrollbar {
+    height: 14px;
+}
+
+#minegrid.bg-grid::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, rgba(11,18,32,0.95), rgba(15,23,42,0.98));
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.02);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+
+#minegrid.bg-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border-radius: 10px;
+    border: 3px solid rgba(11,18,32,1);
+    background-clip: padding-box;
+    box-shadow: inset 0 0 8px rgba(255,255,255,0.02), 0 8px 20px rgba(2,6,23,0.5);
+}
+
+#minegrid.bg-grid::-webkit-scrollbar-thumb:hover {
+    filter: brightness(1.05);
 }
